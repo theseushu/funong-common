@@ -1,1 +1,1 @@
-export appConstants from './appConstants';
+export * as appConstants from './appConstants';

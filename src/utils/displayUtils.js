@@ -5,7 +5,7 @@ import _endsWith from 'lodash/endsWith';
 import format from 'date-fns/format';
 import isBefore from 'date-fns/is_before';
 import timeago from 'timeago.js';
-import { districtLevels, provinces as allProvinces } from 'appConstants';
+import { districtLevels, provinces as allProvinces } from '../appConstants';
 
 export const formatProvinces = (provinces) =>
   (provinces && provinces.length > 0) ? provinces.map((province) => _find(allProvinces, (p) => p.value === province).title).join(' ') : '全国';

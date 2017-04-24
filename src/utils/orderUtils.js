@@ -7,8 +7,8 @@ import _omitBy from 'lodash/omitBy';
 import _orderBy from 'lodash/orderBy';
 import _reduce from 'lodash/reduce';
 import _isUndefined from 'lodash/isUndefined';
-import { statusValues, productTypes, orderFeeTypes } from 'appConstants';
-import { distance } from 'utils/mapUtils';
+import { statusValues, productTypes, orderFeeTypes } from '../appConstants';
+import { distance } from './mapUtils';
 export const isOwner = (order, user) => {
   if (order.status == null) {
     return true;

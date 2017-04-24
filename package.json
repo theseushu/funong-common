@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "lint": "eslint src test",
-    "build:source": "rimraf lib/ && babel src/ --out-dir lib/",
+    "build:source": "babel src/ --out-dir lib/",
     "build:tests": "rimraf test-lib/ && babel test/ --out-dir test-lib/",
     "clean": "rimraf lib/ && rimraf test-lib/",
     "build": "npm run build:source && npm run build:tests",
@@ -22,8 +22,11 @@
     "babel"
   ],
   "peerDependencies": {
+    "date-fns": "^1.28.2",
     "invariant": "2.2.2",
     "lodash": "4.17.2",
+    "querystring": "0.2.0",
+    "timeago.js": "^3.0.1",
     "warning": "3.0.0"
   },
   "devDependencies": {
@@ -34,6 +37,7 @@
     "babel-preset-latest": "6.24.1",
     "babel-preset-stage-0": "6.24.1",
     "chai": "3.5.0",
+    "date-fns": "^1.28.2",
     "eslint": "3.6.1",
     "eslint-config-airbnb": "12.0.0",
     "eslint-plugin-import": "1.16.0",
@@ -47,8 +51,10 @@
     "invariant": "2.2.2",
     "lodash": "4.17.2",
     "mocha": "3.1.0",
+    "querystring": "0.2.0",
     "rimraf": "2.5.4",
     "run-sequence": "1.2.2",
+    "timeago.js": "^3.0.1",
     "warning": "3.0.0"
   },
   "bugs": {

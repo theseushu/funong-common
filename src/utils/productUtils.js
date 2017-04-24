@@ -1,9 +1,8 @@
 import _isEmpty from 'lodash/isEmpty';
 import _reduce from 'lodash/reduce';
 import _uniq from 'lodash/uniq';
-import { productTypes, statusValues } from 'appConstants';
+import { productTypes, statusValues } from '../appConstants';
 import { briefAddress } from './displayUtils';
-// const debug = require('debug')('fonongweb:utils:productUtils');
 
 const categoryToKeywords = (category) => (!category || !category.objectId) ? [] : [category.objectId];
 

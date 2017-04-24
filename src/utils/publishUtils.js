@@ -1,7 +1,7 @@
 import _isEmpty from 'lodash/isEmpty';
 import _reduce from 'lodash/reduce';
 import _uniq from 'lodash/uniq';
-import { publishTypes, statusValues } from 'appConstants';
+import { publishTypes, statusValues } from '../appConstants';
 import { briefAddress } from './displayUtils';
 // const debug = require('debug')('fonongweb:utils:publishUtils');
 
