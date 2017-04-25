@@ -126,6 +126,4 @@ export const districtLevels = {
   custom: { value: 'custom', title: '自定义' },
 };
 
-export icons from './icons';
-
 export publishTypesInfo, { types as publishTypes } from './publishTypes';
