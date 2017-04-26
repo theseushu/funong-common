@@ -1,4 +1,4 @@
-export routes from './routes';
+export routes, { getDefaultRoute, isFarmSiteUser } from './routes';
 export catalogs from './catalogs';
 export productTypes from './productTypes';
 export { productNames } from './productTypes';

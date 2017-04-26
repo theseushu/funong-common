@@ -45,3 +45,37 @@ export default {
   page_user: '/user/:id',
   page_shop: '/shop/:id',
 };
+
+export const getDefaultRoute = (user) => {
+  const type = user ? user.type : undefined;
+  switch (type) {
+    case '微店店主':
+      return '/me/shop';
+    case '农产农资收购':
+      return '/supplies';
+    case '农产农资供货':
+      return '/supplies';
+    case '物流供应商':
+      return '/logistics';
+    case '农贸专家':
+      return '/me';
+    case '一般用户':
+    default:
+      return '/';
+  }
+};
+
+export const isFarmSiteUser = (user) => {
+  const type = user ? user.type : undefined;
+  switch (type) {
+    case '农产农资收购':
+    case '农产农资供货':
+    case '物流供应商':
+    case '农贸专家':
+      return true;
+    case '微店店主':
+    case '一般用户':
+    default:
+      return false;
+  }
+};
