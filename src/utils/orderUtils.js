@@ -238,10 +238,6 @@ export const calculateOrder = (order, currentUser) => {
         discount: true,
         commit: { to: statusValues.billed.value, available: amount !== -1 },
       };
-      console.log(_omitBy({
-        ...result,
-        can,
-      }, _isUndefined));
       return _omitBy({
         ...result,
         can,
