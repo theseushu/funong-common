@@ -7,8 +7,56 @@ import _omitBy from 'lodash/omitBy';
 import _orderBy from 'lodash/orderBy';
 import _reduce from 'lodash/reduce';
 import _isUndefined from 'lodash/isUndefined';
-import { statusValues, productTypes, orderFeeTypes } from '../appConstants';
+import { statusValues, publishTypes, publishTypesInfo, orderFeeTypes } from '../appConstants';
 import { distance } from './mapUtils';
+
+const createOrder = ({ type, items, shop, user, address }) => ({ type, items, shop, user, address, services: [], fees: {} });
+
+const itemsToOrderProducts = (items, type) =>
+  items.map((item) => {
+    const product = item[`${type}`];
+    const info = publishTypesInfo[type];
+    return {
+      quantity: item.quantity,
+      createdAt: item.createdAt,
+      product: _omitBy({
+        objectId: product.objectId,
+        name: product.name,
+        price: info.saleType === 2 ? product.price : undefined,
+        labels: product.labels,
+        spec: info.saleType === 1 ? product.specs[item.specIndex] : undefined,
+        thumbnail: product.thumbnail,
+        location: product.location,
+      }, _isUndefined),
+    };
+  });
+
+export const createOrdersFromCartItems = (cartItems, address) => {
+  const result = [];
+  Object.values(_filter(publishTypes, (t) => publishTypesInfo[t].saleType > 0)) // 0 means not for sale
+    .forEach((type) => {
+      const info = publishTypesInfo[type];
+      const itemsOfType = Object.values(_filter(cartItems, (item) => !!item[`${type}`]));
+      if (info.shop) {
+        const groupedOrderItems = _groupBy(itemsOfType, (item) => item[`${type}`].shop.objectId);
+        result.push(..._map(groupedOrderItems, (orderItems) => {
+          const shop = orderItems[0][`${type}`].shop;
+          const items = itemsToOrderProducts(orderItems, type);
+          return createOrder({ type, items, shop, user: undefined, address });
+        }));
+      } else {
+        const groupedOrderItems = _groupBy(itemsOfType, (item) => item[`${type}`].owner.objectId);
+        result.push(..._map(groupedOrderItems, (orderItems) => {
+          const user = orderItems[0][`${type}`].owner;
+          const items = itemsToOrderProducts(orderItems, type);
+          return createOrder({ type, items, shop: undefined, user, address });
+        }));
+      }
+      return result;
+    }
+  );
+  return _orderBy(result, (order) => -(_reduce(order.items, (r, item) => r > item.createdAt ? r : item.createdAt, 0)));
+};
 
 export const isOwner = (order, user) => {
   if (order.status == null) {
@@ -21,8 +69,7 @@ export const isOwner = (order, user) => {
   return order.owner.objectId === user.objectId;
 };
 
-export const calculateProductAmount = ({ items }) => _reduce(items, (sum, { quantity, product: { spec } }) => sum + (quantity * spec.price), 0);
-export const calculateProductFee = ({ items }) => _reduce(items, (sum, { quantity, product: { spec } }) => sum + (quantity * spec.price), 0);
+export const calculateProductFee = ({ type, items }) => publishTypesInfo[type].saleType === 1 ? _reduce(items, (sum, { quantity, product: { spec } }) => sum + (quantity * spec.price), 0) : -1;
 
 export const calculateServiceFee = ({ services }) => {
   const result = { fee: 0 };
@@ -32,9 +79,9 @@ export const calculateServiceFee = ({ services }) => {
   return result;
 };
 
-export const calculateDeliveryFee = ({ items, shop, address }) => {
+export const calculateDeliveryFee = ({ type, items, shop, address }) => {
   const { areas, location } = shop;
-  const productAmount = calculateProductAmount({ items });
+  const productAmount = calculateProductFee({ type, items });
   const result = {
     inside: false,
     fee: 0,
@@ -60,20 +107,21 @@ export const calculateDeliveryFee = ({ items, shop, address }) => {
 };
 
 export const calculateFees = ({ type, items, shop, address, fees, services }) => {
-  const productAmount = calculateProductAmount({ items });
+  const info = publishTypesInfo[type];
+  const productAmount = calculateProductFee({ type, items });
   const result = { fees: { [orderFeeTypes.product.key]: productAmount } };
   if (!address) {
     return result;
   }
-  if (type === productTypes.supply) {
+  if (!info.shop) {
     const service = calculateServiceFee({ services });
     result.service = service;
     if (service.fee !== 0) {
       result.fees[orderFeeTypes.service.key] = fees[orderFeeTypes.service.key] || service.fee;
     } else {
-      result.fees[orderFeeTypes.service.key] = 0;
+      // result.fees[orderFeeTypes.service.key] = 0;
     }
-  } else if (type === productTypes.shop) {
+  } else {
     const delivery = calculateDeliveryFee({ items, shop, address });
     result.delivery = delivery;
     if (delivery && delivery.fee !== 0) {
@@ -182,7 +230,7 @@ export const calculateOrder = (order, currentUser) => {
         requirements: true,
         service,
         delivery,
-        commit: { to: ((service && service.fee === -1) || (delivery && delivery.fee === -1)) ? statusValues.unconfirmed.value : statusValues.billed.value, available: true },
+        commit: { to: amount === -1 ? statusValues.unconfirmed.value : statusValues.billed.value, available: true },
         cancel: true,
       } : {
         service,
@@ -190,6 +238,10 @@ export const calculateOrder = (order, currentUser) => {
         discount: true,
         commit: { to: statusValues.billed.value, available: amount !== -1 },
       };
+      console.log(_omitBy({
+        ...result,
+        can,
+      }, _isUndefined));
       return _omitBy({
         ...result,
         can,
@@ -199,49 +251,6 @@ export const calculateOrder = (order, currentUser) => {
 };
 
 export const stripOrder = (order) => _omit(order, ['can', 'serviceFee', 'deliveryFee']);
-
-const createOrder = ({ type, items, shop, user, address }) => ({ type, items, shop, user, address, services: [], fees: {} });
-
-const itemsToOrderProducts = (items, type) =>
-  items.map((item) => {
-    const product = item[`${type}Product`];
-    return {
-      quantity: item.quantity,
-      createdAt: item.createdAt,
-      product: _omitBy({
-        objectId: product.objectId,
-        name: product.name,
-        price: product.price,
-        labels: product.labels,
-        spec: product.specs[item.specIndex],
-        thumbnail: product.thumbnail,
-        location: product.location,
-      }, _isUndefined),
-    };
-  });
-
-export const createOrdersFromCartItems = (cartItems, address) => {
-  const result = [];
-  Object.values(productTypes).forEach((type) => {
-    const itemsOfType = Object.values(_filter(cartItems, (item) => !!item[`${type}Product`]));
-    if (type === productTypes.shop) {
-      const groupedOrderItems = _groupBy(itemsOfType, (item) => item[`${type}Product`].shop.objectId);
-      result.push(..._map(groupedOrderItems, (orderItems) => {
-        const shop = orderItems[0][`${type}Product`].shop;
-        const items = itemsToOrderProducts(orderItems, type);
-        return createOrder({ type, items, shop, user: undefined, address });
-      }));
-    } else {
-      const groupedOrderItems = _groupBy(itemsOfType, (item) => item[`${type}Product`].owner.objectId);
-      result.push(..._map(groupedOrderItems, (orderItems) => {
-        const user = orderItems[0][`${type}Product`].owner;
-        const items = itemsToOrderProducts(orderItems, type);
-        return createOrder({ type, items, shop: undefined, user, address });
-      }));
-    }
-  });
-  return _orderBy(result, (order) => -(_reduce(order.items, (r, item) => r > item.createdAt ? r : item.createdAt, 0)));
-};
 
 export const commitButtonName = (nextStatus) => {
   switch (nextStatus) {

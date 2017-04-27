@@ -1,7 +1,7 @@
-import productTypes from './productTypes';
+import { types } from './publishTypes';
 
 export default {
-  [productTypes.supply]: {
+  [types.supply]: {
     delivery: {
       title: '送货',
       value: 'delivery',
@@ -19,10 +19,12 @@ export default {
       value: 'reports',
     },
   },
-  [productTypes.shop]: {
+  [types.flashSale]: {
   },
-  [productTypes.logistics]: {
+  [types.product]: {
   },
-  [productTypes.trip]: {
+  [types.logistics]: {
+  },
+  [types.trip]: {
   },
 };
