@@ -2,6 +2,7 @@ import _reduce from 'lodash/reduce';
 import publishTypesInfo, { types as publishTypes } from './publishTypes';
 
 export default {
+  page_home: '/',
   page_login: '/login',
   page_signup: '/signup',
   page_welcome: '/welcome',

@@ -12,14 +12,20 @@ export const statusValues = {
   unverified: { value: 1, title: '待审核' },
   verified: { value: 2, title: '已通过' },
 
-  unconfirmed: { value: 11, title: '待确认' },
-  billed: { value: 12, title: '待付款' },
-  payed: { value: 13, title: '待发货' },
-  shipping: { value: 14, title: '已发货' },
-  shipped: { value: 15, title: '已收货' },
-  finished: { value: 16, title: '完成' },
-  cancelling: { value: 17, title: '取消中' },
-  cancelled: { value: 18, title: '已取消' },
+  unconfirmed: { value: 10, title: '待确认' },
+  billed: { value: 11, title: '待付款' },
+  payed: { value: 12, title: '待发货' },
+  payed_trip: { value: 13, title: '待出行' },
+  payed_logistics: { value: 14, title: '待出发' },
+  shipping: { value: 20, title: '已发货' },
+  shipping_trip: { value: 21, title: '已抵达' },
+  shipping_logistics: { value: 22, title: '已送达' },
+  shipped: { value: 23, title: '已收货' },
+  shipped_trip: { value: 24, title: '已出行' },
+  shipped_logistics: { value: 25, title: '已收货' },
+  finished: { value: 30, title: '完成' },
+  cancelling: { value: 31, title: '取消中' },
+  cancelled: { value: 32, title: '已取消' },
 };
 
 export const userTypes = [
@@ -115,6 +121,9 @@ export const badges = {
   },
   expertVerified: {
     title: '专家认证', value: 'expertVerified',
+  },
+  official: {
+    title: '富农', value: 'idVerified',
   },
 };
 

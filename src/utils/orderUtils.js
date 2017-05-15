@@ -169,81 +169,127 @@ export const calculateAmount = ({ fees }) => {
 export const calculateOrder = (order, currentUser) => {
   const isCurrentUserOwner = isOwner(order, currentUser);
   const { status } = order;
-  let can = {};
   switch (status) {
     case statusValues.finished.value: {
       return { ...order, can: {} };
     }
-    case statusValues.shipped.value: {
-      can = isCurrentUserOwner ? {
-        commit: { to: statusValues.finished.value, available: true },
-      } : {};
-      return { ...order, can };
-    }
-    case statusValues.shipping.value: {
-      can = isCurrentUserOwner ? {
-        commit: { to: statusValues.shipped.value, available: true },
-      } : {
-      };
-      return { ...order, can };
-    }
-    case statusValues.payed.value: {
-      can = isCurrentUserOwner ? {} : {
-        commit: { to: statusValues.shipping.value, available: true },
-        cancel: true,
-      };
-      return { ...order, can };
-    }
-    case statusValues.billed.value: {
-      can = isCurrentUserOwner ? {
-        commit: { to: statusValues.payed.value, available: true },
-        cancel: true,
-      } : {
-        discount: true,
-        commit: { to: statusValues.billed.value, available: true },
-      };
-      return { ...order, amount: calculateAmount({ fees: order.fees }), can };
-    }
+    case statusValues.shipped.value:
+    case statusValues.shipped_trip.value:
+    case statusValues.shipped_logistics.value:
+      return calculateShippedOrder(order, isCurrentUserOwner);
+    case statusValues.shipping.value:
+    case statusValues.shipping_trip.value:
+    case statusValues.shipping_logistics.value:
+      return calculateShippingOrder(order, isCurrentUserOwner);
+    case statusValues.payed.value:
+    case statusValues.payed_trip.value:
+    case statusValues.payed_logistics.value:
+      return calculatePayedOrder(order, isCurrentUserOwner);
+    case statusValues.billed.value:
+      return calculateBilledOrder(order, isCurrentUserOwner);
     case statusValues.unconfirmed.value:
-    default: {
-      const { items, address } = order;
-      if (!address) {
-        return _omitBy({
-          type: order.type,
-          items,
-          shop: order.shop,
-          user: order.user,
-          services: [],
-          fees: {},
-          can: {},
-        }, _isUndefined);
-      }
-      const { fees, service, delivery } = calculateFees(order);
-      const amount = calculateAmount({ fees });
-      const result = {
-        ...order,
-        items,
-        fees,
-        amount,
-      };
-      can = isCurrentUserOwner ? {
-        requirements: true,
-        service,
-        delivery,
-        commit: { to: amount === -1 ? statusValues.unconfirmed.value : statusValues.billed.value, available: true },
-        cancel: true,
-      } : {
-        service,
-        delivery,
-        discount: true,
-        commit: { to: statusValues.billed.value, available: amount !== -1 },
-      };
-      return _omitBy({
-        ...result,
-        can,
-      }, _isUndefined);
-    }
+    default:
+      return calculateUnconfirmedOrder(order, isCurrentUserOwner);
   }
+};
+
+const calculateShippedOrder = (order, isCurrentUserOwner) => {
+  const can = isCurrentUserOwner ? {
+    commit: { to: statusValues.finished.value, available: true },
+  } : {};
+  return { ...order, can };
+};
+
+const calculateShippingOrder = (order, isCurrentUserOwner) => {
+  const { type } = order;
+  let nextStatus;
+  if (type === publishTypes.trip) {
+    nextStatus = statusValues.shipped_trip.value;
+  } else if (type === publishTypes.logistics) {
+    nextStatus = statusValues.shipped_logistics.value;
+  } else {
+    nextStatus = statusValues.shipped.value;
+  }
+  const can = isCurrentUserOwner ? {
+    commit: { to: nextStatus, available: true },
+  } : {};
+  return { ...order, can };
+};
+
+const calculatePayedOrder = (order, isCurrentUserOwner) => {
+  const { type } = order;
+  let nextStatus;
+  if (type === publishTypes.trip) {
+    nextStatus = statusValues.shipping_trip.value;
+  } else if (type === publishTypes.logistics) {
+    nextStatus = statusValues.shipping_logistics.value;
+  } else {
+    nextStatus = statusValues.shipping.value;
+  }
+  const can = isCurrentUserOwner ? {} : {
+    commit: { to: nextStatus, available: true },
+    cancel: true,
+  };
+  return { ...order, can };
+};
+
+const calculateBilledOrder = (order, isCurrentUserOwner) => {
+  const { type } = order;
+  let nextStatus;
+  if (type === publishTypes.trip) {
+    nextStatus = statusValues.payed_trip.value;
+  } else if (type === publishTypes.logistics) {
+    nextStatus = statusValues.payed_logistics.value;
+  } else {
+    nextStatus = statusValues.payed.value;
+  }
+  const can = isCurrentUserOwner ? {
+    commit: { to: nextStatus, available: true },
+    cancel: true,
+  } : {
+    discount: true,
+    commit: { to: statusValues.billed.value, available: true },
+  };
+  return { ...order, amount: calculateAmount({ fees: order.fees }), can };
+};
+
+const calculateUnconfirmedOrder = (order, isCurrentUserOwner) => {
+  const { items, address } = order;
+  if (!address) {
+    return _omitBy({
+      type: order.type,
+      items,
+      shop: order.shop,
+      user: order.user,
+      services: [],
+      fees: {},
+      can: {},
+    }, _isUndefined);
+  }
+  const { fees, service, delivery } = calculateFees(order);
+  const amount = calculateAmount({ fees });
+  const result = {
+    ...order,
+    items,
+    fees,
+    amount,
+  };
+  const can = isCurrentUserOwner ? {
+    requirements: true,
+    service,
+    delivery,
+    commit: { to: amount === -1 ? statusValues.unconfirmed.value : statusValues.billed.value, available: true },
+    cancel: true,
+  } : {
+    service,
+    delivery,
+    discount: true,
+    commit: { to: statusValues.billed.value, available: amount !== -1 },
+  };
+  return _omitBy({
+    ...result,
+    can,
+  }, _isUndefined);
 };
 
 export const stripOrder = (order) => _omit(order, ['can', 'serviceFee', 'deliveryFee']);
@@ -254,9 +300,19 @@ export const commitButtonName = (nextStatus) => {
       return '完成订单';
     case statusValues.shipped.value:
       return '确认收货';
+    case statusValues.shipped_trip.value:
+      return '确认出行';
+    case statusValues.shipped_logistics.value:
+      return '确认收货';
     case statusValues.shipping.value:
       return '发货';
+    case statusValues.shipping_trip.value:
+      return '客户抵达';
+    case statusValues.shipping_logistics.value:
+      return '开始运送';
     case statusValues.payed.value:
+    case statusValues.payed_trip.value:
+    case statusValues.payed_logistics.value:
       return '付款';
     case statusValues.billed.value:
       return '确认订单';
