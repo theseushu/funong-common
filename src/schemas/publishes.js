@@ -236,24 +236,12 @@ export default (AV) => {
     include: [],
   };
 
-  class SupplyProduct extends AV.Object {
-  }
-  AV.Object.register(SupplyProduct);
-  class TripProduct extends AV.Object {
-  }
-  AV.Object.register(TripProduct);
-  class ShopProduct extends AV.Object {
-  }
-  AV.Object.register(ShopProduct);
-  class LogisticsProduct extends AV.Object {
-  }
-  AV.Object.register(LogisticsProduct);
-  class Inquiry extends AV.Object {
-  }
-  AV.Object.register(Inquiry);
-  class FlashSale extends AV.Object {
-  }
-  AV.Object.register(FlashSale);
+  const SupplyProduct = AV.Object.extends('SupplyProduct');
+  const TripProduct = AV.Object.extends('TripProduct');
+  const ShopProduct = AV.Object.extends('ShopProduct');
+  const LogisticsProduct = AV.Object.extends('LogisticsProduct');
+  const Inquiry = AV.Object.extends('Inquiry');
+  const FlashSale = AV.Object.extends('FlashSale');
 
   const schemas = {
     [publishTypes.supply]: {
