@@ -236,12 +236,12 @@ export default (AV) => {
     include: [],
   };
 
-  const SupplyProduct = AV.Object.extends('SupplyProduct');
-  const TripProduct = AV.Object.extends('TripProduct');
-  const ShopProduct = AV.Object.extends('ShopProduct');
-  const LogisticsProduct = AV.Object.extends('LogisticsProduct');
-  const Inquiry = AV.Object.extends('Inquiry');
-  const FlashSale = AV.Object.extends('FlashSale');
+  const SupplyProduct = AV.Object.extend('SupplyProduct');
+  const TripProduct = AV.Object.extend('TripProduct');
+  const ShopProduct = AV.Object.extend('ShopProduct');
+  const LogisticsProduct = AV.Object.extend('LogisticsProduct');
+  const Inquiry = AV.Object.extend('Inquiry');
+  const FlashSale = AV.Object.extend('FlashSale');
 
   const schemas = {
     [publishTypes.supply]: {
