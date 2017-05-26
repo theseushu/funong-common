@@ -3,7 +3,7 @@ import _isEmpty from 'lodash/isEmpty';
 import _omitBy from 'lodash/omitBy';
 import _isUndefined from 'lodash/isUndefined';
 
-export const criteriaToQuery = ({ keywords, category, species, provinces, sort = {}, page, pageSize }) => {
+export const criteriaToQuery = ({ keywords, category, species, provinces, status, sort = {}, page, pageSize }) => {
   const query = {
     keywords: keywords || undefined,
     category: category ? category.objectId : undefined,
@@ -12,6 +12,7 @@ export const criteriaToQuery = ({ keywords, category, species, provinces, sort =
     sort: sort.sort ? sort.sort : undefined,
     order: sort.sort && sort.order ? sort.order : undefined,
     page: page || undefined,
+    status,
     pageSize: pageSize || undefined,
   };
   return queryString.stringify(_omitBy(query, _isUndefined));
@@ -21,7 +22,7 @@ export const queryToCriteria = (query) => {
   if (!query) {
     return {};
   }
-  const { keywords, category, species, provinces, sort, order, page, pageSize } = query;
+  const { keywords, category, species, provinces, status, sort, order, page, pageSize } = query;
   const criteria = {};
   if (keywords) {
     criteria.keywords = keywords;
@@ -41,12 +42,15 @@ export const queryToCriteria = (query) => {
   if (sort) {
     criteria.sort = { sort, order };
   }
+  if (status) {
+    criteria.status = status;
+  }
   criteria.page = page != null ? Number(page) : 1;
   criteria.pageSize = pageSize != null ? Number(pageSize) : 24;
   return criteria;
 };
 
-export const criteriaToApiParams = ({ keywords, category, species, provinces, sort = {}, page, pageSize }) => {
+export const criteriaToApiParams = ({ keywords, category, species, provinces, status, sort = {}, page, pageSize }) => {
   const query = {
     keywords: keywords || undefined,
     category: category ? { objectId: category } : undefined,
@@ -55,6 +59,7 @@ export const criteriaToApiParams = ({ keywords, category, species, provinces, so
     sort,
     page: page || undefined,
     pageSize: pageSize || undefined,
+    status,
   };
   return _omitBy(query, _isUndefined);
 };
