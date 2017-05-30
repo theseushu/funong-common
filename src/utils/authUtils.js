@@ -28,3 +28,10 @@ export const createShopAuthorized = (user, shop) => {
   }
   return !!_find(user.badges, (badge) => (badge === badges.companyVerified.value || badge === badges.idVerified.value));
 };
+
+export const isUserOfficial = (user) => {
+  if (!user) {
+    return false;
+  }
+  return !!_find(user.badges, (badge) => badge === badges.official.value);
+};

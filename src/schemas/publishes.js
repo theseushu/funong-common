@@ -1,5 +1,5 @@
 import _reduce from 'lodash/reduce';
-import { publishTypes } from '../appConstants';
+import { publishTypes, badges } from '../appConstants';
 import { attributes as attrConverters } from '../converters/publish';
 const debug = require('debug')('funongweb:api:leancloud:utils:schema:publishes');
 
@@ -236,6 +236,18 @@ export default (AV) => {
     include: [],
   };
 
+
+  const official = {
+    search: (query, value) => {
+      if (value) {
+        const innerQuery = new AV.Query('_User');
+        // todo change from hard-coded username to something else
+        innerQuery.equalTo('username', 'fnsc');
+        query.matchesQuery('owner', innerQuery);
+      }
+    },
+  };
+
   const SupplyProduct = AV.Object.extend('SupplyProduct');
   const TripProduct = AV.Object.extend('TripProduct');
   const ShopProduct = AV.Object.extend('ShopProduct');
@@ -262,6 +274,7 @@ export default (AV) => {
         minPrice,
         labels,
         owner,
+        official,
         createdAt,
         updatedAt,
       },

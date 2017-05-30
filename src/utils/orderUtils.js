@@ -182,8 +182,6 @@ export const calculateOrder = (order, currentUser) => {
     case statusValues.shipping_logistics.value:
       return calculateShippingOrder(order, isCurrentUserOwner);
     case statusValues.payed.value:
-    case statusValues.payed_trip.value:
-    case statusValues.payed_logistics.value:
       return calculatePayedOrder(order, isCurrentUserOwner);
     case statusValues.billed.value:
       return calculateBilledOrder(order, isCurrentUserOwner);
@@ -234,15 +232,7 @@ const calculatePayedOrder = (order, isCurrentUserOwner) => {
 };
 
 const calculateBilledOrder = (order, isCurrentUserOwner) => {
-  const { type } = order;
-  let nextStatus;
-  if (type === publishTypes.trip) {
-    nextStatus = statusValues.payed_trip.value;
-  } else if (type === publishTypes.logistics) {
-    nextStatus = statusValues.payed_logistics.value;
-  } else {
-    nextStatus = statusValues.payed.value;
-  }
+  const nextStatus = statusValues.payed.value;
   const can = isCurrentUserOwner ? {
     commit: { to: nextStatus, available: true },
     cancel: true,
@@ -311,8 +301,6 @@ export const commitButtonName = (nextStatus) => {
     case statusValues.shipping_logistics.value:
       return '开始运送';
     case statusValues.payed.value:
-    case statusValues.payed_trip.value:
-    case statusValues.payed_logistics.value:
       return '付款';
     case statusValues.billed.value:
       return '确认订单';

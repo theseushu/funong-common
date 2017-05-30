@@ -123,7 +123,7 @@ export const badges = {
     title: '专家认证', value: 'expertVerified',
   },
   official: {
-    title: '富农', value: 'idVerified',
+    title: '官微供', value: 'offical',
   },
 };
 

@@ -42,6 +42,7 @@ export default {
     ...result,
     [`page_${info.route}`]: `/${info.route}/:id`,
   }), {}),
+  page_official_supplies: `/official/${publishTypesInfo[publishTypes.supply].plural}`,
   page_order: '/order',
   page_user: '/user/:id',
   page_shop: '/shop/:id',
