@@ -74,6 +74,18 @@ export const formatStartAndEndTime = (startTime, endTime) => {
   return `${timeagoIns.format(startTime)}开始`;
 };
 
+export const formatStartAndEndDate = (startTime, endTime) => {
+  const now = new Date();
+  const timeagoIns = timeago(now);
+  timeagoIns.setLocale('zh_CN');
+  if (isBefore(endTime, now)) {
+    return '已结束';
+  } else if (isBefore(startTime, now)) {
+    return `${timeagoIns.format(endTime)}结束`;
+  }
+  return `${timeagoIns.format(startTime)}开始`;
+};
+
 export const humanizeTime = (time) => {
   const timeagoIns = timeago();
   timeagoIns.setLocale('zh_CN');

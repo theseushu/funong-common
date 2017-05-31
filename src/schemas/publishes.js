@@ -1,5 +1,5 @@
 import _reduce from 'lodash/reduce';
-import { publishTypes, badges } from '../appConstants';
+import { publishTypes } from '../appConstants';
 import { attributes as attrConverters } from '../converters/publish';
 const debug = require('debug')('funongweb:api:leancloud:utils:schema:publishes');
 
@@ -207,7 +207,6 @@ export default (AV) => {
     },
   };
 
-
   const shop = {
     create: (product, value) => setRequiredAttr(product, 'shop', AV.Object.createWithoutData('Shop', value.objectId)),
     converter: attrConverters.shop,
@@ -235,7 +234,6 @@ export default (AV) => {
     converter: attrConverters.original,
     include: [],
   };
-
 
   const official = {
     search: (query, value) => {
@@ -275,6 +273,8 @@ export default (AV) => {
         labels,
         owner,
         official,
+        startAt,
+        endAt,
         createdAt,
         updatedAt,
       },

@@ -16,8 +16,8 @@ const lnglatConverter = createConverter('lnglat', lnglatToJSON);
 
 export const attributes = {
   objectId: createConverter('objectId'),
-  startAt: createConverter('startAt', (date) => date.getTime()),
-  endAt: createConverter('endAt', (date) => date.getTime()),
+  startAt: createConverter('startAt', (date) => date && date.getTime()),
+  endAt: createConverter('endAt', (date) => date && date.getTime()),
   createdAt: createConverter('createdAt', (date) => date.getTime()),
   updatedAt: createConverter('updatedAt', (date) => date.getTime()),
   status: createConverter('status'),
